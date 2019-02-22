@@ -1,0 +1,83 @@
+---
+title: "Chen et al. 2018: M-CSF macrophage classification"
+author: "Andrew Y.F. Li Yim"
+date: "7/12/2018"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Put the title of your vignette here}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+
+```
+
+## Introduction
+
+In Chen et al. 2018, we describe a classifier built from several M-CSF macrophage datasets. While we provided the coefficients (log Odds Ratios) as supplementary files with the manuscript, we understand that this is not encessarily user friendly. As such, we have created this package to allow users to input their own macrophage expression data to see which of our investigated macrophages they look like most. 
+
+In particular, we built classifiers for the following macrophage subsets:
+
+* CTRL
+* LPS Early
+* LPS Late
+* LPS IFNg
+* IFNg
+* IL4
+* IL10
+* DEX
+
+To this end, we performed (500) repeated ten-fold cross-validation using the [glmnet ](https://cran.r-project.org/web/packages/glmnet/index.html) package. 
+
+### Disclaimer
+
+We built our classifier using expression datasets obtained from M-CSF treated macrophages. Specifically, we trained our classifier using raw microarray data (obtained from different Illumina, Affymetrix and Agilent platforms) and log2 library-normalized counts as obtained from RNAseq (obtained from HiSeq2000). While our classifier should in theory work for qPCR (arrays) as well, penalized regression methods are dependent on the distribution and so the classification error could be influenced by the housekeeping genes and platform utilized. Furthermore, we are unsure what will happen if one inputs non-macrophage data. 
+
+## Tutorial: Classifying macrophages
+
+To classify macrophages, you will first need to import our package
+
+```{r load the mclassifier package}
+#Input github page here
+library(mclassifier)
+```
+
+We will demonstrate the usage of our package by classifying our testing set.
+
+```{r Import testing set}
+data("testset_exprdata")
+data("testset_metadata")
+```
+
+```{r Visually inspecting exprdata}
+testset_exprdata[1:10,1:5]
+```
+
+The `testset_exprdata` contains the actual expression data with genes annotated with Entrez IDs as rows and samples as columns,  whereas the `testset_metadata` contains sample information with samples as rows and metadata as columns. This will be used later on. The `testset_exprdata` will be used as input for the classifier.
+
+To perform the actual classification, you will need to use the `macClassifier` function included in this package. That function will return a `sparseClassification` object which not only contains classification results in the form of log odds, odds and proportion, but also stores gene-wise log odds and provides information on the presence and absence of classifier genes.
+
+Classification starts with the creation of a list of stabilized log odds ratios. In the article we stabilized the log odds ratios across the iterations using the median and a threshold of 0.5, where the latter represents the minimal cutoff at which we thought a gene to be stable or not.
+
+```{r Prepare the stabilized log odds ratios}
+stab_lor_list <- lORStabilizer()
+```
+
+Once the list of stabilized coefficients have been created, the next step is to perform the actual classification.
+
+```{r Classification}
+mc_obj <- macClassifier(exprs_data = testset_exprdata, lor_list = stab_lor_list)
+```
+
+All data can be accessed using specific accessor functions.
+
+```{r Odds extraction}
+head(getOdds(mc_obj))
+```
+
+If you want to plot the data, you can use the `responsePlot` function.
+
+```{r Response plotting}
+responsePlot(mc_obj, actual_class = testset_metadata$Group)
+```

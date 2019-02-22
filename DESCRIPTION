@@ -1,0 +1,30 @@
+Package: macIDR
+Type: Package
+Title: Macrophage identifier
+Version: 0.1.0
+Author: Andrew Y.F. Li Yim
+Maintainer: Andrew Y.F. Li Yim <andrewliyim@gmail.com>
+Description: A wrapper function for utilizing the classifier models for the eight M-CSF in vitro macrophage subsets as decribed in Chen et al. 2019.
+    The following macrophage subsets can be distinguished: M0, MLPSearly, MLPSlate, MLPSIFNg, MIFNg, MIL4, MIL10, and Mdex.
+License: BSD-2
+Encoding: UTF-8
+LazyData: true
+Imports:
+    ggplot2,
+    GenomicRanges
+Suggests: 
+    knitr, 
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 6.1.1
+Collate: 
+    'allGenerics.R'
+    'data.R'
+    'geneLOddsExtractor.R'
+    'geneLOddsPlot.R'
+    'lORStabilizer.R'
+    'macClassifier.R'
+    'responsePlot.R'
+    'sparseClassification-class.R'
+    'sparseOdds.R'
+    'sparseSumLOdds.R'
